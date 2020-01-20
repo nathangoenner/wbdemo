@@ -1,0 +1,12 @@
+stm32wbxx_ll_bus.h:340:22:LL_AHB1_GRP1_EnableClock	8	static
+stm32wbxx_ll_bus.h:508:22:LL_AHB2_GRP1_EnableClock	8	static
+hw_uart.c:152:10:HW_UART_Init	0	static
+hw_uart.c:175:10:HW_UART_Receive_IT	0	static
+hw_uart.c:198:10:HW_UART_Transmit_IT	0	static
+hw_uart.c:221:17:HW_UART_Transmit	8	static
+hw_uart.c:269:17:HW_UART_Transmit_DMA	8	static
+hw_uart.c:329:10:HW_UART_Interrupt_Handler	0	static
+hw_uart.c:352:10:HW_UART_DMA_Interrupt_Handler	0	static
+hw_uart.c:381:10:HAL_UART_MspInit	64	static
+hw_uart.c:413:10:HAL_UART_RxCpltCallback	0	static
+hw_uart.c:442:10:HAL_UART_TxCpltCallback	0	static

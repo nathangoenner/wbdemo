@@ -1,0 +1,7 @@
+stm32_lpm_if.c:105:6:PWR_ExitOffMode	0	static
+stm32_lpm_if.c:176:6:PWR_ExitStopMode	0	static
+stm32_lpm_if.c:214:6:PWR_EnterSleepMode	8	static,ignoring_inline_asm
+stm32_lpm_if.c:242:6:PWR_ExitSleepMode	0	static
+stm32_lpm_if.c:70:6:PWR_EnterOffMode	0	static,ignoring_inline_asm
+stm32_lpm_if.c:261:13:Switch_On_HSI	0	static
+stm32_lpm_if.c:118:6:PWR_EnterStopMode	8	static,ignoring_inline_asm

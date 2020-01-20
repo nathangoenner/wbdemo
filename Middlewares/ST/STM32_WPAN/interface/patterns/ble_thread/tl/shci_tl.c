@@ -73,17 +73,34 @@ void shci_user_evt_proc(void)
   TL_EvtPacket_t *phcievtbuffer;
   tSHCI_UserEvtRxParam UserEvtRxParam;
 
-  while((LST_is_empty(&SHciAsynchEventQueue) == FALSE) && (SHCI_TL_UserEventFlow != SHCI_TL_UserEventFlow_Disable))
+  /**
+   * Up to release version v1.2.0, a while loop was implemented to read out events from the queue as long as
+   * it is not empty. However, in a bare metal implementation, this leads to calling in a "blocking" mode
+   * shci_user_evt_proc() as long as events are received without giving the opportunity to run other tasks
+   * in the background.
+   * From now, the events are reported one by one. When it is checked there is still an event pending in the queue,
+   * a request to the user is made to call again shci_user_evt_proc().
+   * This gives the opportunity to the application to run other background tasks between each event.
+   */
+
+  /**
+   * It is more secure to use LST_remove_head()/LST_insert_head() compare to LST_get_next_node()/LST_remove_node()
+   * in case the user overwrite the header where the next/prev pointers are located
+   */
+  if((LST_is_empty(&SHciAsynchEventQueue) == FALSE) && (SHCI_TL_UserEventFlow != SHCI_TL_UserEventFlow_Disable))
   {
     LST_remove_head ( &SHciAsynchEventQueue, (tListNode **)&phcievtbuffer );
-
-    SHCI_TL_UserEventFlow = SHCI_TL_UserEventFlow_Enable;
 
     if (shciContext.UserEvtRx != NULL)
     {
       UserEvtRxParam.pckt = phcievtbuffer;
+      UserEvtRxParam.status = SHCI_TL_UserEventFlow_Enable;
       shciContext.UserEvtRx((void *)&UserEvtRxParam);
       SHCI_TL_UserEventFlow = UserEvtRxParam.status;
+    }
+    else
+    {
+      SHCI_TL_UserEventFlow = SHCI_TL_UserEventFlow_Enable;
     }
 
     if(SHCI_TL_UserEventFlow != SHCI_TL_UserEventFlow_Disable)
@@ -98,6 +115,12 @@ void shci_user_evt_proc(void)
       LST_insert_head ( &SHciAsynchEventQueue, (tListNode *)phcievtbuffer );
     }
   }
+
+  if((LST_is_empty(&SHciAsynchEventQueue) == FALSE) && (SHCI_TL_UserEventFlow != SHCI_TL_UserEventFlow_Disable))
+  {
+    shci_notify_asynch_evt((void*) &SHciAsynchEventQueue);
+  }
+
 
   return;
 }
@@ -189,6 +212,7 @@ static void Cmd_SetStatus(SHCI_TL_CmdStatus_t shcicmdstatus)
 
 static void TlCmdEvtReceived(TL_EvtPacket_t *shcievt)
 {
+  (void)(shcievt);
   shci_cmd_resp_release(0); /**< Notify the application the Cmd response has been received */
 
   return;

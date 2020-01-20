@@ -1,0 +1,4 @@
+crs_app.c:150:13:CRSAPP_Update	0	static
+crs_app.c:75:13:CRSAPP_Terminal_UART_RxCpltCallback	24	static
+crs_app.c:155:6:CRSAPP_Notification	16	static
+crs_app.c:201:6:CRSAPP_Init	24	static

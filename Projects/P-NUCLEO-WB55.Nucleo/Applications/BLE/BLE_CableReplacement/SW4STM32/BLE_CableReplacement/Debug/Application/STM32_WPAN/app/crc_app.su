@@ -1,0 +1,5 @@
+crc_app.c:878:6:CRCAPP_Update_Service	24	static
+crc_app.c:289:30:CRCAPP_Event_Handler	144	static
+crc_app.c:151:13:CRCAPP_Write_Char.constprop	8	static
+crc_app.c:211:13:CRCAPP_Terminal_UART_RxCpltCallback	24	static
+crc_app.c:841:6:CRCAPP_Init	24	static

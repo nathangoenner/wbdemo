@@ -1,0 +1,17 @@
+app_ble.c:982:13:ConnMgr	0	static
+app_ble.c:1179:13:BLE_UserEvtRx	8	static
+app_ble.c:1197:13:BLE_StatusNot	0	static
+app_ble.c:927:13:Connect_Request	48	static
+app_ble.c:894:13:Scan_Request	8	static
+app_ble.c:975:13:AdvUpdate	48	static
+app_ble.c:227:6:APP_BLE_Init	104	static
+app_ble.c:345:28:SVCCTL_App_Notification	56	static
+app_ble.c:684:22:APP_BLE_Get_Client_Connection_Status	8	static
+app_ble.c:708:22:APP_BLE_Get_Server_Connection_Status	0	static
+app_ble.c:730:6:APP_BLE_Key_Button1_Action	0	static
+app_ble.c:734:6:APP_BLE_Key_Button2_Action	0	static
+app_ble.c:738:6:APP_BLE_Key_Button3_Action	0	static
+app_ble.c:1161:6:hci_notify_asynch_evt	0	static
+app_ble.c:1167:6:hci_cmd_resp_release	0	static
+app_ble.c:1173:6:hci_cmd_resp_wait	0	static
+app_ble.c:1228:6:SVCCTL_ResumeUserEventFlow	0	static

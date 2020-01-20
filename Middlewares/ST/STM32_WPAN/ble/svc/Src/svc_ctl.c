@@ -58,6 +58,8 @@ PLACE_IN_SECTION("BLE_DRIVER_CONTEXT") SVCCTL_CltHandler_t SVCCTL_CltHandler;
 
 /* Private functions ----------------------------------------------------------*/
 /* Weak functions ----------------------------------------------------------*/
+void BVOPUS_STM_Init(void);
+
 __weak void BLS_Init( void )
 {
   return;
@@ -114,6 +116,10 @@ __weak void MESH_Init( void )
 {
   return;
 }
+__weak void BVOPUS_STM_Init( void )
+{
+  return;
+}
 __weak void SVCCTL_InitCustomSvc( void )
 {
   return;
@@ -133,7 +139,13 @@ void SVCCTL_Init( void )
   /**
    * Add and Initialize requested services
    */
+  SVCCTL_SvcInit();
 
+  return;
+}
+
+__weak void SVCCTL_SvcInit(void)
+{
   BLS_Init();
 
   CRS_STM_Init();
@@ -159,11 +171,13 @@ void SVCCTL_Init( void )
   P2PS_STM_Init();
 
   OTAS_STM_Init();
+  
+  BVOPUS_STM_Init();
+
+  MESH_Init();
 
   SVCCTL_InitCustomSvc();
   
-  MESH_Init();
-
   return;
 }
 
@@ -176,8 +190,10 @@ void SVCCTL_RegisterSvcHandler( SVC_CTL_p_EvtHandler_t pfBLE_SVC_Service_Event_H
 {
 #if (BLE_CFG_SVC_MAX_NBR_CB > 0)
   SVCCTL_EvtHandler.SVCCTL__SvcHandlerTab[SVCCTL_EvtHandler.NbreOfRegisteredHandler] = pfBLE_SVC_Service_Event_Handler;
-#endif
   SVCCTL_EvtHandler.NbreOfRegisteredHandler++;
+#else
+  (void)(pfBLE_SVC_Service_Event_Handler);
+#endif
 
   return;
 }
@@ -191,8 +207,10 @@ void SVCCTL_RegisterCltHandler( SVC_CTL_p_EvtHandler_t pfBLE_SVC_Client_Event_Ha
 {
 #if (BLE_CFG_CLT_MAX_NBR_CB > 0)
   SVCCTL_CltHandler.SVCCTL_CltHandlerTable[SVCCTL_CltHandler.NbreOfRegisteredHandler] = pfBLE_SVC_Client_Event_Handler;
-#endif
   SVCCTL_CltHandler.NbreOfRegisteredHandler++;
+#else
+  (void)(pfBLE_SVC_Client_Event_Handler);
+#endif
 
   return;
 }

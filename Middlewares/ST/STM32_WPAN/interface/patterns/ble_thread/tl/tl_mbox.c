@@ -6,11 +6,11 @@
  ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
+  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the 
+  * the "License"; You may not use this file except in compliance with the
   * License. You may obtain a copy of the License at:
   *                        opensource.org/licenses/BSD-3-Clause
   *
@@ -36,6 +36,7 @@ PLACE_IN_SECTION("MAPPING_TABLE") static volatile MB_RefTable_t TL_RefTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_DeviceInfoTable_t TL_DeviceInfoTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_BleTable_t TL_BleTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_ThreadTable_t TL_ThreadTable;
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_LldTestsTable_t TL_LldTestsTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_SysTable_t TL_SysTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_MemManagerTable_t TL_MemManagerTable;
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static MB_TracesTable_t TL_TracesTable;
@@ -79,6 +80,7 @@ void TL_Init( void )
   TL_RefTable.p_device_info_table = &TL_DeviceInfoTable;
   TL_RefTable.p_ble_table = &TL_BleTable;
   TL_RefTable.p_thread_table = &TL_ThreadTable;
+  TL_RefTable.p_lld_tests_table = &TL_LldTestsTable;
   TL_RefTable.p_sys_table = &TL_SysTable;
   TL_RefTable.p_mem_manager_table = &TL_MemManagerTable;
   TL_RefTable.p_traces_table = &TL_TracesTable;
@@ -118,6 +120,9 @@ int32_t TL_BLE_Init( void* pConf )
 
 int32_t TL_BLE_SendCmd( uint8_t* buffer, uint16_t size )
 {
+  (void)(buffer);
+  (void)(size);
+  
   ((TL_CmdPacket_t*)(TL_RefTable.p_ble_table->pcmd_buffer))->cmdserial.type = TL_BLECMD_PKT_TYPE;
 
   HW_IPCC_BLE_SendCmd();
@@ -141,6 +146,9 @@ void HW_IPCC_BLE_RxEvtNot(void)
 
 int32_t TL_BLE_SendAclData( uint8_t* buffer, uint16_t size )
 {
+  (void)(buffer);
+  (void)(size);
+  
   ((TL_AclDataPacket_t *)(TL_RefTable.p_ble_table->phci_acl_data_buffer))->AclDataSerial.type = TL_ACL_DATA_PKT_TYPE;
 
   HW_IPCC_BLE_SendAclData();
@@ -179,6 +187,9 @@ int32_t TL_SYS_Init( void* pConf  )
 
 int32_t TL_SYS_SendCmd( uint8_t* buffer, uint16_t size )
 {
+  (void)(buffer);
+  (void)(size);
+
   ((TL_CmdPacket_t *)(TL_RefTable.p_sys_table->pcmd_buffer))->cmdserial.type = TL_SYSCMD_PKT_TYPE;
 
   HW_IPCC_SYS_SendCmd();
@@ -282,11 +293,62 @@ void HW_IPCC_THREAD_CliEvtNot( void )
   return;
 }
 
-__weak void TL_OT_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
-__weak void TL_THREAD_NotReceived( TL_EvtPacket_t * Notbuffer ){};
-__weak void TL_THREAD_CliNotReceived( TL_EvtPacket_t * Notbuffer ){};
+__WEAK void TL_OT_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_THREAD_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+__WEAK void TL_THREAD_CliNotReceived( TL_EvtPacket_t * Notbuffer ){};
 
 #endif /* THREAD_WB */
+
+/******************************************************************************
+ * LLD TESTS
+ ******************************************************************************/
+#ifdef LLD_TESTS_WB
+void TL_LLDTESTS_Init( TL_LLD_tests_Config_t *p_Config )
+{
+  MB_LldTestsTable_t  * p_lld_tests_table;
+
+  p_lld_tests_table = TL_RefTable.p_lld_tests_table;
+  p_lld_tests_table->clicmdrsp_buffer = p_Config->p_LldTestsCliCmdRspBuffer;
+  p_lld_tests_table->m0cmd_buffer = p_Config->p_LldTestsM0CmdBuffer;
+  HW_IPCC_LLDTESTS_Init();
+  return;
+}
+
+void TL_LLDTESTS_SendCliCmd( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_lld_tests_table->clicmdrsp_buffer))->cmdserial.type = TL_CLICMD_PKT_TYPE;
+  HW_IPCC_LLDTESTS_SendCliCmd();
+  return;
+}
+
+void HW_IPCC_LLDTESTS_ReceiveCliRsp( void )
+{
+  TL_LLDTESTS_ReceiveCliRsp( (TL_CmdPacket_t*)(TL_RefTable.p_lld_tests_table->clicmdrsp_buffer) );
+  return;
+}
+
+void TL_LLDTESTS_SendCliRspAck( void )
+{
+  HW_IPCC_LLDTESTS_SendCliRspAck();
+  return;
+}
+
+void HW_IPCC_LLDTESTS_ReceiveM0Cmd( void )
+{
+  TL_LLDTESTS_ReceiveM0Cmd( (TL_CmdPacket_t*)(TL_RefTable.p_lld_tests_table->m0cmd_buffer) );
+  return;
+}
+
+
+void TL_LLDTESTS_SendM0CmdAck( void )
+{
+  HW_IPCC_LLDTESTS_SendM0CmdAck();
+  return;
+}
+
+__WEAK void TL_LLDTESTS_ReceiveCliRsp( TL_CmdPacket_t * Notbuffer ){};
+__WEAK void TL_LLDTESTS_ReceiveM0Cmd( TL_CmdPacket_t * Notbuffer ){};
+#endif /* LLD_TESTS_WB */
 
 #ifdef MAC_802_15_4_WB
 /******************************************************************************
@@ -338,8 +400,8 @@ void HW_IPCC_MAC_802_15_4_EvtNot( void )
   return;
 }
 
-__weak void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
-__weak void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+__WEAK void TL_MAC_802_15_4_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_MAC_802_15_4_NotReceived( TL_EvtPacket_t * Notbuffer ){};
 #endif
 
 #ifdef ZIGBEE_WB
@@ -354,6 +416,7 @@ void TL_ZIGBEE_Init( TL_ZIGBEE_Config_t *p_Config )
     p_zigbee_table = TL_RefTable.p_zigbee_table;
     p_zigbee_table->appliCmdM4toM0_buffer = p_Config->p_ZigbeeOtCmdRspBuffer;
     p_zigbee_table->notifM0toM4_buffer = p_Config->p_ZigbeeNotAckBuffer;
+    p_zigbee_table->loggingM0toM4_buffer = p_Config->p_ZigbeeLoggingBuffer;
 
     HW_IPCC_ZIGBEE_Init();
 
@@ -395,8 +458,27 @@ void HW_IPCC_ZIGBEE_AppliAsyncEvtNotification( void )
   return;
 }
 
-__weak void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
-__weak void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer ){};
+/* Zigbee logging */
+void HW_IPCC_ZIGBEE_AppliAsyncLoggingNotification( void )
+{
+  TL_ZIGBEE_LoggingReceived( (TL_EvtPacket_t*)(TL_RefTable.p_zigbee_table->loggingM0toM4_buffer) );
+
+  return;
+}
+
+/* Send a Logging ACK to the M0 */
+void TL_ZIGBEE_SendAckAfterAppliLoggingFromM0 ( void )
+{
+  ((TL_CmdPacket_t *)(TL_RefTable.p_zigbee_table->loggingM0toM4_buffer))->cmdserial.type = TL_OTACK_PKT_TYPE;
+
+  HW_IPCC_ZIGBEE_SendLoggingAck();
+
+  return;
+}
+
+
+__WEAK void TL_ZIGBEE_CmdEvtReceived( TL_EvtPacket_t * Otbuffer  ){};
+__WEAK void TL_ZIGBEE_NotReceived( TL_EvtPacket_t * Notbuffer ){};
 #endif
 
 
@@ -474,6 +556,9 @@ void HW_IPCC_TRACES_EvtNot(void)
   return;
 }
 
-__weak void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt ){};
+__WEAK void TL_TRACES_EvtReceived( TL_EvtPacket_t * hcievt )
+{
+    (void)(hcievt);
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
