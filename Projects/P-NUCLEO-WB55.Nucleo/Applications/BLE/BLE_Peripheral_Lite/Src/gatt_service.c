@@ -93,6 +93,7 @@ static SVCCTL_EvtAckStatus_t MyVeryOwnService_EventHandler(void *Event)
   aci_gatt_attribute_modified_event_rp0 *attribute_modified;
   return_value = SVCCTL_EvtNotAck;
   event_pckt = (hci_event_pckt *)(((hci_uart_pckt*)Event)->data);
+  static int8_t speed = 0;
   
   switch(event_pckt->evt)
   {
@@ -105,13 +106,17 @@ static SVCCTL_EvtAckStatus_t MyVeryOwnService_EventHandler(void *Event)
         attribute_modified = (aci_gatt_attribute_modified_event_rp0*)blue_evt->data;
         if(attribute_modified->Attr_Handle == (myVeryOwnServiceContext.MyVeryOwnWriteCharacteristicHandle + CHARACTERISTIC_VALUE_ATTRIBUTE_OFFSET))
         {
-          if (attribute_modified->Attr_Data[1] == 0x01)
-          {
-            BSP_LED_On(LED_BLUE);
-          }
-          else {
-            BSP_LED_Off(LED_BLUE);
-          }
+          speed = (int8_t)attribute_modified->Attr_Data[0];
+          set_motor_speed(0, speed);
+          speed = (int8_t)attribute_modified->Attr_Data[1];
+          set_motor_speed(1, speed);
+        //   if (attribute_modified->Attr_Data[1] == 0x01)
+        //   {
+        //     BSP_LED_On(LED_BLUE);
+        //   }
+        //   else {
+        //     BSP_LED_Off(LED_BLUE);
+        //   }
         }
         
         break;
